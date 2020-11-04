@@ -1,0 +1,10 @@
+﻿procedure
+var
+Byte
+Integer
+Begin
+if
+then
+else
+and
+End
