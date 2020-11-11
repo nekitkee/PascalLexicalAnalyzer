@@ -1,4 +1,4 @@
-﻿procedure TCalcDisplay.Draw; 
+﻿procedure TCalcDisplay...Draw; 
 var Color: Byte; I: Integer; B: TDrawBuffer;
 Begin
 	Key := UpCase(Key);

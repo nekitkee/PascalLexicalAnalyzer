@@ -10,7 +10,7 @@ namespace PascalLexicalAnalizer
         {
             PrintAllLexems(analizer.Lexemes);
             Console.WriteLine(analizer.Message);
-            //PrintTable("IDENTIFIERS TABLE", analizer.TableIdentifiers);
+            PrintTable("IDENTIFIERS TABLE", analizer.TableIdentifiers);
             PrintTable("LITERALS TABLE", analizer.TableLiterals);
         }
 
