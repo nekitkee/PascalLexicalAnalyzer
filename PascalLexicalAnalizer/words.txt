@@ -8,3 +8,10 @@ then
 else
 and
 End
+inherit
+constructor
+New
+const
+of
+do
+not

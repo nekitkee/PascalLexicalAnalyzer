@@ -1,11 +1,14 @@
-﻿procedure TCalcDisplay...Draw; 
-var Color: Byte; I: Integer; B: TDrawBuffer;
-Begin
-	Key := UpCase(Key);
-	if (Status = csError) and(Key <> 'C') then Key:= ' ';
-	Color:= GetColor(1);
-	I:= Size.X - Length(Number) - 2;
-	MoveChar(B, ' ', Color, Size.X);
-	MoveStr(B[I + 1], Number, Color);
-	WriteBuf(0, 0, Size.X, 1, B);
-End;
+﻿constructor TCalculator.Init;
+const  KeyChar: array[0..19] of Char = 'C'#27'%'#241'789/456*123-0.=+';
+var  I: Integer;  P: PView;  R: TRect;
+begin
+  R.Assign(5, 3, 29, 18); inherited Init(R, 'Calculator'); 
+  Options := Options or ofFirstClick;
+  for I := 0 to 19 do
+  begin
+    P:=New(PButton, Init(R, KeyChar[I],cmCalcButton, bfNormal + bfBroadcast));
+    P^.Options := P^.Options and not ofSelectable;
+    Insert(P);
+  end;  R.Assign(3, 2, 21, 3);
+  Insert(New(PCalcDisplay, Init(R)));
+end;
