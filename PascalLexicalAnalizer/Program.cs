@@ -17,12 +17,13 @@ namespace PascalLexicalAnalizer
             var delimiters = ListReader.ReadList("../../../delimiters.txt");
             string text = File.ReadAllText("../../../code.txt");
 
-            LexicalAnalyzer analizer = new LexicalAnalyzer(words,delimiters);
-            analizer.Analyze(text);
-            ResultPrinter.Print(analizer);
+            var lexicalAnalizer = new LexicalAnalyzer(words,delimiters);
+            lexicalAnalizer.Analyze(text);
+            LexAnalyzerResult.Print(lexicalAnalizer);
 
-            var syntaxAnalyzer = new SyntaxAnalyzer(analizer.Lexemes);
+            var syntaxAnalyzer = new SyntaxAnalyzer(lexicalAnalizer.Lexemes);
             syntaxAnalyzer.Analyze();
+            SyntAnalyzerResult.Print(syntaxAnalyzer);
 
             Console.ReadKey();
         }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PascalLexicalAnalizer
 {
-    public class ResultPrinter
+    public class LexAnalyzerResult
     {
         public static void Print(LexicalAnalyzer analizer)
         {
