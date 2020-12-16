@@ -13,7 +13,7 @@ namespace PascalLexicalAnalizer
 
         private List<string> _words; 
         private List<string> _delimiters;
-        private enum States { START, NUMBER, STRING, DELIMITER, FINISH, ID, ERROR, ASGN } // states of state machine
+        private enum States { START, NUMBER, STRING, DELIMITER, FINISH, ID, ERROR, ASGN , NOTEQ } // states of state machine
         private States _state; // current state 
         public List<string> TableIdentifiers { get; private set; }
         public List<string> TableLiterals { get; private set; }
@@ -110,6 +110,9 @@ namespace PascalLexicalAnalizer
                     case States.ASGN:
                         AsignVertex();
                         break;
+                    case States.NOTEQ:
+                        NotEqVertex();
+                        break;
                     case States.ERROR:
                         ErrorVertex();
                         break;
@@ -121,6 +124,22 @@ namespace PascalLexicalAnalizer
         {
             Log("Program error....");
             _state = States.FINISH;
+        }
+
+        private void NotEqVertex()
+        {
+            if (_currentChar == '>')
+            {
+                AddBuf(_currentChar);
+                AddLexem(_buf, LexType.KEY);
+                ClearBuf();
+                GetNextChar();
+            }
+            else
+            {
+                AddLexem(_buf, LexType.KEY);
+            }
+            _state = States.START;
         }
 
         private void AsignVertex()
@@ -228,6 +247,12 @@ namespace PascalLexicalAnalizer
             else if (_currentChar == ':')
             {
                 _state = States.ASGN;
+                AddBuf(_currentChar);
+                GetNextChar();
+            }
+            else if (_currentChar == '<')
+            {
+                _state = States.NOTEQ;
                 AddBuf(_currentChar);
                 GetNextChar();
             }
