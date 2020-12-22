@@ -15,11 +15,11 @@ namespace PascalLexicalAnalizer
 
             var words = ListReader.ReadList("../../../words.txt");
             var delimiters = ListReader.ReadList("../../../delimiters.txt");
-            string text = File.ReadAllText("../../../code.txt");
+            string text = File.ReadAllText("../../../Ifcode.txt");
 
             var lexicalAnalizer = new LexicalAnalyzer(words,delimiters);
             lexicalAnalizer.Analyze(text);
-            LexAnalyzerResult.Print(lexicalAnalizer);
+            //LexAnalyzerResult.Print(lexicalAnalizer);
 
             var syntaxAnalyzer = new SyntaxAnalyzer(lexicalAnalizer.Lexemes);
             syntaxAnalyzer.Analyze();

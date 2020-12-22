@@ -23,6 +23,7 @@ namespace PascalLexicalAnalizer
         /// </summary>
         public void Analyze()
         {
+            bool ifound = false;
             //SHIT CODE BELOW
             try
             {
@@ -30,11 +31,18 @@ namespace PascalLexicalAnalizer
                 {
                     if (_currentLex.value == "if")
                     {
+                        ifound = true;
                         IfStatement();
                     }
                 }
-
-                Result = "NO SYNTAX ERROR";
+                if (ifound)
+                {
+                    Result = "NO SYNTAX ERROR";
+                }
+                else
+                {
+                    Result = "ERROR: NO IF STATEMENT";
+                }
             }
             catch(Exception ex)
             {
@@ -59,7 +67,7 @@ namespace PascalLexicalAnalizer
 
             if (GetNextLex() && _currentLex.value == "then")
             {
-                Statement();
+                StateCorrect();
             }
             else
             {
@@ -68,20 +76,35 @@ namespace PascalLexicalAnalizer
         }
 
         /// <summary>
-        /// Parse statement. Any count of lexem until ';'
-        /// if no ';' found - throw exception
+        /// Parse statement. 
+        /// IDN := {IDN|LIT}
         /// </summary>
-        private void Statement()
+        private void StateCorrect()
         {
-            while (GetNextLex())
+            if (!GetNextLex() || _currentLex.type != LexType.IDN)
             {
-                if (_currentLex.value == ";")
-                {
-                    return;
-                }
+                throw new Exception(" Identificator expected in <state>");
             }
 
-            throw new Exception(" ; expected");
+            if (!GetNextLex() || _currentLex.value != ":=")
+            {
+                throw new Exception(" := expected in <state>");
+            }
+
+            if (!GetNextLex() || !(_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT))
+            {
+                throw new Exception(" identificator or litteral expected in <state>");
+            }
+
+            if (!GetNextLex() || _currentLex.value != ";")
+            {
+                throw new Exception(" := expected in <state>");
+            }
+
+            if (GetNextLex())
+            {
+                throw new Exception("  Additional lexem after <state> not expected");
+            }
         }
 
         /// <summary>
@@ -182,6 +205,8 @@ namespace PascalLexicalAnalizer
                 throw new Exception("memeber of logical relation should be identificator or litteral");
             }
         }
+
+     
 
         /// <summary>
         /// Update _currentLexem
