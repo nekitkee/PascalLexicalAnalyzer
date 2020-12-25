@@ -17,10 +17,6 @@ namespace PascalLexicalAnalizer
             _lexemes = lexemes;
         }
 
-        /// <summary>
-        /// SOURCE STRING FOR ANALYS
-        /// if Event.Command = cmCalcButton then ClearEvent(Event);
-        /// </summary>
         public void Analyze()
         {
             //SHIT CODE BELOW
@@ -35,9 +31,6 @@ namespace PascalLexicalAnalizer
             }
         }
 
-        /// <summary>
-        /// Parse if statement
-        /// </summary>
         private void IfStatement()
         {
             Word("if");
@@ -45,11 +38,17 @@ namespace PascalLexicalAnalizer
             Word("then");
             FunctionCall();
             Word(";");
+            LexemListisEmpty();
         }
 
-        /// <summary>
-        /// Parse logical relation
-        /// </summary>
+        private void LexemListisEmpty()
+        {
+            if (GetNextLex())
+            {
+                throw new Exception("No lexems after ; expected");
+            }
+        }
+
         private void LogicalRelation()
         {
             Property();
@@ -57,9 +56,6 @@ namespace PascalLexicalAnalizer
             LiteralOrIdentifier();
         }
 
-        /// <summary>
-        /// Parse function call with one param (ex. ClearEvent(Event) )
-        /// </summary>
         private void FunctionCall()
         {
             try
@@ -75,20 +71,6 @@ namespace PascalLexicalAnalizer
             }
         }
 
-        /// <summary>
-        /// Parse word 
-        /// </summary>
-        private void Word(string keyword)
-        {
-            if (!GetNextLex() || _currentLex.value != keyword)
-            {
-                throw new Exception($"{keyword} expected");
-            }
-        }
-
-        /// <summary>
-        /// Parse property  (ex. Event.Command)
-        /// </summary>
         private void Property()
         {
             Identifier();
@@ -96,44 +78,30 @@ namespace PascalLexicalAnalizer
             Identifier();
         }
 
-        /// <summary>
-        /// Next lexem is identifier
-        /// </summary>
-        private void Identifier()
+        private void CheckNextLex(Func<bool> predicate, Func<string> ErrorMessage)
         {
-            if (!GetNextLex() || _currentLex.type != LexType.IDN)
+            if (!GetNextLex() || !predicate())
             {
-                throw new Exception("identifier expected");
+                throw new Exception(ErrorMessage());
             }
         }
 
-        /// <summary>
-        /// Next lexem is relation operator (<> , > , = etc) 
-        /// if not - throw Exception
-        /// </summary>
-        private void RelationOperator()
-        {
-            if (!GetNextLex() || !_relationOperatorsList.Contains(_currentLex.value))
-            {
-                throw new Exception($"unknown relation operator {_currentLex.value}");
-            }
-        }
+        private void Word(string word) =>
+            CheckNextLex(() => (_currentLex.value == word), 
+                         () => $"{word} expected");
 
-        /// <summary>
-        /// Next lexem is litteral or identifier
-        /// </summary>
-        private void LiteralOrIdentifier()
-        {
-            if (!GetNextLex() || !(_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT))
-            {
-                throw new Exception("identificator or litteral expected");
-            }
-        }
+        private void Identifier() =>
+             CheckNextLex(() => (_currentLex.type == LexType.IDN), 
+                          ()=> "identifier expected");
 
-        /// <summary>
-        /// Update _currentLexem
-        /// </summary>
-        /// <returns>false if end of list</returns>
+        private void RelationOperator() =>
+            CheckNextLex(() => (_relationOperatorsList.Contains(_currentLex.value)), 
+                         () => $"unknown relation operator {_currentLex.value}");
+
+        private void LiteralOrIdentifier() =>
+            CheckNextLex(() => (_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT), 
+                         () => "Literal or identifier expected");
+
         private bool GetNextLex()
         {
             if (_currentLexIndex < _lexemes.Count)
