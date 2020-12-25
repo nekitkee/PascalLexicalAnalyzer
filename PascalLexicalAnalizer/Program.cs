@@ -11,7 +11,7 @@ namespace PascalLexicalAnalizer
         {
             //var words = ListReader.ReadList("words.txt");
             //var delimiters = ListReader.ReadList("delimiters.txt");
-            //string text = File.ReadAllText("code.txt");
+            //string text = File.ReadAllText("Ifcode.txt");
 
             var words = ListReader.ReadList("../../../words.txt");
             var delimiters = ListReader.ReadList("../../../delimiters.txt");

@@ -19,194 +19,108 @@ namespace PascalLexicalAnalizer
 
         /// <summary>
         /// SOURCE STRING FOR ANALYS
-        /// if (Status = csError) and(Key <> 'C') then Key:= ' ';
+        /// if Event.Command = cmCalcButton then ClearEvent(Event);
         /// </summary>
         public void Analyze()
         {
-            bool ifound = false;
             //SHIT CODE BELOW
             try
             {
-                while (GetNextLex())
-                {
-                    if (_currentLex.value == "if")
-                    {
-                        ifound = true;
-                        IfStatement();
-                    }
-                }
-                if (ifound)
-                {
-                    Result = "NO SYNTAX ERROR";
-                }
-                else
-                {
-                    Result = "ERROR: NO IF STATEMENT";
-                }
+                IfStatement();
+                Result = "No errors";
             }
             catch(Exception ex)
             {
-                Result = "SYNTAX ERROR: " +  ex.Message;
+                Result = "error! " +  ex.Message;
             }
         }
 
         /// <summary>
-        /// Parse If statement 
-        /// example: If {condition} then {Statement};
+        /// Parse if statement
         /// </summary>
         private void IfStatement()
         {
-            if (GetNextLex() && (_currentLex.value == "(" || _currentLex.value == "not"))
-            {
-                LogicalExpr();
-            }
-            else
-            {
-                throw new Exception("Logical expretion should start with ( or NOT");
-            }
+            Word("if");
+            Property();
+            RelationOperator();
+            LiteralOrIdentifier();
+            Word("then");
+            FunctionCall();
+            Word(";");
+        }
 
-            if (GetNextLex() && _currentLex.value == "then")
+        /// <summary>
+        /// Parse function call with one param (ex. ClearEvent(Event) )
+        /// </summary>
+        private void FunctionCall()
+        {
+            try
             {
-                StateCorrect();
+                Identifier();
+                Word("(");
+                LiteralOrIdentifier();
+                Word(")");
             }
-            else
+            catch
             {
-                throw new Exception("Then expected");
+                throw new Exception($"Function call expected");
             }
         }
 
         /// <summary>
-        /// Parse statement. 
-        /// IDN := {IDN|LIT}
+        /// Parse word 
         /// </summary>
-        private void StateCorrect()
+        private void Word(string keyword)
+        {
+            if (!GetNextLex() || _currentLex.value != keyword)
+            {
+                throw new Exception($"{keyword} expected");
+            }
+        }
+
+        /// <summary>
+        /// Parse property  (ex. Event.Command)
+        /// </summary>
+        private void Property()
+        {
+            Identifier();
+            Word(".");
+            Identifier();
+        }
+
+        /// <summary>
+        /// Next lexem is identifier
+        /// </summary>
+        private void Identifier()
         {
             if (!GetNextLex() || _currentLex.type != LexType.IDN)
             {
-                throw new Exception(" Identificator expected in <state>");
-            }
-
-            if (!GetNextLex() || _currentLex.value != ":=")
-            {
-                throw new Exception(" := expected in <state>");
-            }
-
-            if (!GetNextLex() || !(_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT))
-            {
-                throw new Exception(" identificator or litteral expected in <state>");
-            }
-
-            if (!GetNextLex() || _currentLex.value != ";")
-            {
-                throw new Exception(" := expected in <state>");
-            }
-
-            if (GetNextLex())
-            {
-                throw new Exception("  Additional lexem after <state> not expected");
+                throw new Exception("identifier expected");
             }
         }
 
         /// <summary>
-        /// Parse logical expression. 
-        /// Structure:  (LogicalMember) {and | or}  (LogicalMember) .
-        /// LogicalMember is {LogicalReleation | LogicalExpression}
-        /// NOT operator is not implemented
-        /// </summary>
-        private void LogicalExpr()
-        {
-            //1-st member
-            LogicalExprMember();
-            LogicOperator();
-
-            //2-nd member
-            if (GetNextLex() && _currentLex.value == "(")
-            {
-                LogicalExprMember();
-            }
-            else
-            {
-                throw new Exception(" ( - expected");
-            }
-        }
-
-        private void LogicOperator()
-        {
-            if (!GetNextLex() || !(_currentLex.value == "and" || _currentLex.value == "or"))
-            {
-                throw new Exception("logical operator expected");
-            }
-        }
-
-        /// <summary>
-        /// LogicalMember is LogicalReleation | LogicalExpression
-        /// </summary>
-        private void LogicalExprMember()
-        {
-            if (GetNextLex() && _currentLex.value == "(")
-            {
-                LogicalExpr();
-                GetNextLex();
-            }
-            else
-            {
-                LogicalRelationExpr();
-            }
-        }
-
-        /// <summary>
-        /// Parse logical relation. 
-        /// Example: (foo > bar)
-        /// </summary>
-        private void LogicalRelationExpr()
-        {
-            LiteralOrIdentifier();
-            
-            GetNextLex();
-            RelationOperator();
-            
-            GetNextLex();
-            LiteralOrIdentifier();
-            
-            GetNextLex();
-            ClosingParenthesis();
-        }
-
-        /// <summary>
-        /// Current lexem is relation operator (<> , > , = etc) 
+        /// Next lexem is relation operator (<> , > , = etc) 
         /// if not - throw Exception
         /// </summary>
         private void RelationOperator()
         {
-            if (!_relationOperatorsList.Contains(_currentLex.value))
+            if (!GetNextLex() || !_relationOperatorsList.Contains(_currentLex.value))
             {
                 throw new Exception($"unknown relation operator {_currentLex.value}");
             }
         }
 
         /// <summary>
-        /// Current lexem is '(', if not - throw Exception
-        /// </summary>
-        private void ClosingParenthesis()
-        {
-            if ( !(_currentLex.value == ")"))
-            {
-                throw new Exception(" ) expected");
-            }
-        }
-
-        /// <summary>
-        /// Current lexem is litteral or identifier
+        /// Next lexem is litteral or identifier
         /// </summary>
         private void LiteralOrIdentifier()
         {
-            if (!(_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT))
+            if (!GetNextLex() || !(_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT))
             {
-                throw new Exception("memeber of logical relation should be identificator or litteral");
+                throw new Exception("identificator or litteral expected");
             }
         }
-
-     
 
         /// <summary>
         /// Update _currentLexem
