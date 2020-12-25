@@ -84,12 +84,15 @@ namespace PascalLexicalAnalizer
         private void Word(string word) =>
             ParseNextLexem(predicate:() => (_currentLex.value == word), 
                         errorMessage:() => $"{word} expected");
+
         private void Identifier() =>
              ParseNextLexem(predicate:() => (_currentLex.type == LexType.IDN), 
                          errorMessage:() => "Identificator expected");
+        
         private void RelationOperator() =>
             ParseNextLexem(predicate:() => (_relationOperatorsList.Contains(_currentLex.value)), 
                         errorMessage:() => $"unknown relation operator {_currentLex.value}");
+        
         private void LiteralOrIdentifier() =>
             ParseNextLexem(predicate:() => (_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT), 
                         errorMessage:() => "Literal or identifier expected");
