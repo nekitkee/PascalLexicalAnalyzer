@@ -1,1 +1,1 @@
-﻿if Event.Command; = cmCalcButton then ClearEvent(Event);
+﻿if Event.Command = cmCalcButton then ClearEvent(Event);
