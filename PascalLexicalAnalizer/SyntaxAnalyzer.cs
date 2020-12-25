@@ -41,12 +41,20 @@ namespace PascalLexicalAnalizer
         private void IfStatement()
         {
             Word("if");
-            Property();
-            RelationOperator();
-            LiteralOrIdentifier();
+            LogicalRelation();
             Word("then");
             FunctionCall();
             Word(";");
+        }
+
+        /// <summary>
+        /// Parse logical relation
+        /// </summary>
+        private void LogicalRelation()
+        {
+            Property();
+            RelationOperator();
+            LiteralOrIdentifier();
         }
 
         /// <summary>
