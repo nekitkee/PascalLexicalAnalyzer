@@ -23,7 +23,7 @@ namespace PascalLexicalAnalizer
             try
             {
                 IfStatement();
-                Result = "No errors";
+                Result = "no errors";
             }
             catch(Exception ex)
             {
@@ -31,6 +31,7 @@ namespace PascalLexicalAnalizer
             }
         }
 
+        // if Event.Command = cmCalcButton then ClearEvent(Event);
         private void IfStatement()
         {
             Word("if");
@@ -39,14 +40,6 @@ namespace PascalLexicalAnalizer
             FunctionCall();
             Word(";");
             LexemListisEmpty();
-        }
-
-        private void LexemListisEmpty()
-        {
-            if (GetNextLex())
-            {
-                throw new Exception("No lexems after ; expected");
-            }
         }
 
         private void LogicalRelation()
@@ -78,29 +71,37 @@ namespace PascalLexicalAnalizer
             Identifier();
         }
 
-        private void CheckNextLex(Func<bool> predicate, Func<string> ErrorMessage)
+        private void LexemListisEmpty()
+        {
+            if (GetNextLex())
+            {
+                throw new Exception("No lexems after ; expected");
+            }
+        }
+
+        private void ParseNextLexem(Func<bool> predicate, Func<string> errorMessage)
         {
             if (!GetNextLex() || !predicate())
             {
-                throw new Exception(ErrorMessage());
+                throw new Exception(errorMessage());
             }
         }
 
         private void Word(string word) =>
-            CheckNextLex(() => (_currentLex.value == word), 
-                         () => $"{word} expected");
+            ParseNextLexem(predicate:() => (_currentLex.value == word), 
+                        errorMessage:() => $"{word} expected");
 
         private void Identifier() =>
-             CheckNextLex(() => (_currentLex.type == LexType.IDN), 
-                          ()=> "identifier expected");
+             ParseNextLexem(predicate:() => (_currentLex.type == LexType.IDN), 
+                         errorMessage:() => "Identificator expected");
 
         private void RelationOperator() =>
-            CheckNextLex(() => (_relationOperatorsList.Contains(_currentLex.value)), 
-                         () => $"unknown relation operator {_currentLex.value}");
+            ParseNextLexem(predicate:() => (_relationOperatorsList.Contains(_currentLex.value)), 
+                        errorMessage:() => $"unknown relation operator {_currentLex.value}");
 
         private void LiteralOrIdentifier() =>
-            CheckNextLex(() => (_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT), 
-                         () => "Literal or identifier expected");
+            ParseNextLexem(predicate:() => (_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT), 
+                        errorMessage:() => "Literal or identifier expected");
 
         private bool GetNextLex()
         {
