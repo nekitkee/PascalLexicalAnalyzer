@@ -19,7 +19,6 @@ namespace PascalLexicalAnalizer
 
         public void Analyze()
         {
-            //SHIT CODE BELOW
             try
             {
                 IfStatement();
