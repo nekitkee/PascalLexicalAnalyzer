@@ -43,7 +43,7 @@ namespace PascalLexicalAnalizer
             };
         }
 
-        public void Analyze()
+        public void Analyze() 
         {
             try
             {
