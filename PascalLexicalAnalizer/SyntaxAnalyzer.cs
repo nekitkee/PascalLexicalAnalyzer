@@ -11,15 +11,40 @@ namespace PascalLexicalAnalizer
         private Lex _currentLex = null; 
         private List<string> _relationOperatorsList = new List<string> { "<>", "=", ">", ">", "<=", ">=" };
         public string Result { get; set;} = "";
-
+        private Dictionary<string, List<Action>> _syntax;
         public SyntaxAnalyzer(List<Lex> lexemes)
         {
             _lexemes = lexemes;
+            _syntax = new Dictionary<string, List<Action>>
+            {
+                {
+                    "IfStatement",
+                    new List<Action>{
+                () => Word("if") ,  LogicalRelation, ()=> Word("then"), FunctionCall, () => Word(";") , LexemListisEmpty }
+                },
+
+                {
+                    "LogicalRelation",
+                    new List<Action> {
+                Property, RelationOperator , LiteralOrIdentifier}
+                },
+
+                {
+                    "FunctionCall",
+                    new List<Action> {
+                Identifier, () => Word("("), LiteralOrIdentifier, () => Word(")") }
+                },
+
+                {
+                    "Property",
+                    new List<Action> {
+                Identifier, () => Word("."), Identifier }
+                }
+            };
         }
 
         public void Analyze()
         {
-            //SHIT CODE BELOW
             try
             {
                 IfStatement();
@@ -31,44 +56,21 @@ namespace PascalLexicalAnalizer
             }
         }
 
-        // if Event.Command = cmCalcButton then ClearEvent(Event);
-        private void IfStatement()
-        {
-            Word("if");
-            LogicalRelation();
-            Word("then");
-            FunctionCall();
-            Word(";");
-            LexemListisEmpty();
-        }
-
-        private void LogicalRelation()
-        {
-            Property();
-            RelationOperator();
-            LiteralOrIdentifier();
-        }
+        private void ParseSyntaxSequence(List<Action> parsersList) => parsersList.ForEach(p => p.Invoke());
+        private void IfStatement() => ParseSyntaxSequence(_syntax["IfStatement"]);
+        private void LogicalRelation() => ParseSyntaxSequence(_syntax["LogicalRelation"]);
+        private void Property() => ParseSyntaxSequence(_syntax["Property"]);
 
         private void FunctionCall()
         {
             try
             {
-                Identifier();
-                Word("(");
-                LiteralOrIdentifier();
-                Word(")");
+                ParseSyntaxSequence(_syntax["FunctionCall"]);
             }
             catch
             {
                 throw new Exception($"Function call expected");
             }
-        }
-
-        private void Property()
-        {
-            Identifier();
-            Word(".");
-            Identifier();
         }
 
         private void LexemListisEmpty()
@@ -110,10 +112,8 @@ namespace PascalLexicalAnalizer
                 _currentLex = _lexemes[_currentLexIndex++];
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            
+            return false;
         }
     }
 }
