@@ -9,7 +9,8 @@ namespace PascalLexicalAnalizer
         private List<Lex> _lexemes;
         private int _currentLexIndex = 0;
         private Lex _currentLex = null; 
-        private List<string> _relationOperatorsList = new List<string> { "<>", "=", ">", ">", "<=", ">=" };
+        private List<string> _relationOperatorsList = new List<string> { "<>", "=", ">", "<", "<=", ">=" };
+        private List<string> _mathOperatorsList = new List<string> { "+", "-", "/", "mod", "*" };
         public string Result { get; set;} = "";
 
         public SyntaxAnalyzer(List<Lex> lexemes)
@@ -30,13 +31,25 @@ namespace PascalLexicalAnalizer
             }
         }
 
-        // if Event.Command = cmCalcButton then ClearEvent(Event);
+        // if Tmp.Num = 2 then R.A.X := (I mod 4) * 5 + 2;
         private void IfStatement()
         {
             Word("if");
             LogicalRelation();
             Word("then");
-            FunctionCall();
+
+            SuperProperty();
+            Word(":=");
+
+            Word("(");
+            LiteralOrIdentifier();
+            MathOperator();
+            LiteralOrIdentifier();
+            Word(")");
+            MathOperator();
+            LiteralOrIdentifier();
+            MathOperator();
+            LiteralOrIdentifier();
             Word(";");
             LexemListisEmpty();
         }
@@ -48,24 +61,16 @@ namespace PascalLexicalAnalizer
             LiteralOrIdentifier();
         }
 
-        private void FunctionCall()
-        {
-            try
-            {
-                Identifier();
-                Word("(");
-                LiteralOrIdentifier();
-                Word(")");
-            }
-            catch
-            {
-                throw new Exception($"Function call expected");
-            }
-        }
-
         private void Property()
         {
             Identifier();
+            Word(".");
+            Identifier();
+        }
+
+        private void SuperProperty()
+        {
+            Property();
             Word(".");
             Identifier();
         }
@@ -97,6 +102,10 @@ namespace PascalLexicalAnalizer
         private void RelationOperator() =>
             ParseNextLexem(predicate:() => (_relationOperatorsList.Contains(_currentLex.value)), 
                         errorMessage:() => $"unknown relation operator {_currentLex.value}");
+
+        private void MathOperator() =>
+           ParseNextLexem(predicate: () => (_mathOperatorsList.Contains(_currentLex.value)),
+                       errorMessage: () => $"unknown arithmetic operator {_currentLex.value}");
 
         private void LiteralOrIdentifier() =>
             ParseNextLexem(predicate:() => (_currentLex.type == LexType.IDN || _currentLex.type == LexType.LIT), 

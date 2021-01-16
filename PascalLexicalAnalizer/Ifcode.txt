@@ -1,1 +1,1 @@
-﻿if Event.Command = cmCalcButton then ClearEvent(Event);
+﻿if Tmp.Num = 2 then R.A.X := (I mod 4) * 5 + 2;
